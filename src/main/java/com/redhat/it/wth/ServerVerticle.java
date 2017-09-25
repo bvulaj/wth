@@ -7,6 +7,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.StaticHandler;
 
 @Component
 public class ServerVerticle extends AbstractVerticle {
@@ -21,12 +22,12 @@ public class ServerVerticle extends AbstractVerticle {
 
 	private Router router() {
 		Router router = Router.router(vertx);
-		// router.route().handler(StaticHandler.create()); // for some reason this causes other routes to not be served. will figure out later
 		router.route("/hello").handler(routingContext -> {
 			HttpServerResponse response = routingContext.response();
 			response.putHeader("Content-Type", "application/json");
 			response.end(Json.encodePrettily("Hello World"));
 		});
+		router.route().handler(StaticHandler.create());
 		return router;
 	}
 }
