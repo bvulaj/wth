@@ -43,22 +43,27 @@ public class RepoHandler implements Handler<RoutingContext>, NeedsVertx<RepoHand
 					.map(scanner -> (NeedsVertx<?>) scanner)
 					.forEach(needsVertxScanner -> needsVertxScanner.setVertx(vertx));
 
+			// Grab futures so all the scanners can async execute
 			final URL repoUrl = new URL("https://gitolite.corp.redhat.com/cgit/it-smw");
-			final List<Future> futureList = repoScanners.stream()
+			final List<Future> scannerFutures = repoScanners.stream()
 					.map(scanner -> scanner.scanForRepos(repoUrl))
 					.collect(Collectors.toList());
 
-			CompositeFuture.all(futureList).setHandler(repoScanResults -> {
+			// Aggregate all the futures
+			CompositeFuture.all(scannerFutures).setHandler(repoScanResults -> {
 				if (repoScanResults.succeeded()) {
-					final Set<Repo> blah = repoScanResults.result().list().stream()
+					final Set<Repo> aggregatedRepoScanResults = repoScanResults.result().list().stream()
 							.flatMap(rawStream -> ((Set<Repo>) rawStream).stream())
 							.collect(Collectors.toSet());
-					System.out.println("future response: " + repoScanResults.result().list());
-					response.end(Json.encodePrettily(blah));
+					response.end(Json.encodePrettily(aggregatedRepoScanResults));
+				} else {
+					routingContext.response().setStatusCode(500);
+					routingContext.response().setStatusMessage("Internal Server Error");
+					response.end();
 				}
 			});
 		} catch (MalformedURLException e) {
-			// TODO real error handling
+			// TODO real error handling, quit repeating error generation
 			routingContext.response().setStatusCode(500);
 			routingContext.response().setStatusMessage("Internal Server Error");
 			response.end();

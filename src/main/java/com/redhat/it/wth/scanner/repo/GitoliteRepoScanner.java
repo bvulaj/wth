@@ -42,8 +42,9 @@ public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepo
 						System.out.println("found elements: " + repoTableDatas.size());
 						System.out.println(repoTableDatas);
 
+						// TODO convert these relative paths into full paths
 						foundRepos.addAll(repoTableDatas.stream()
-								.map(repoTableData -> new Repo(repoTableData.select("[title]").text(), repoTableData.select("href").text()))
+								.map(repoTableData -> new Repo(repoTableData.select("[title]").text(), repoTableData.select("[href]").text()))
 								.collect(Collectors.toSet()));
 
 						System.out.println(foundRepos);
