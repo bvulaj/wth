@@ -2,6 +2,7 @@ package com.redhat.it.wth;
 
 import java.util.List;
 
+import com.redhat.it.wth.handler.RepoHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,9 +33,7 @@ public class ServerVerticle extends AbstractVerticle {
 			response.putHeader("Content-Type", "application/json");
 			response.end(Json.encodePrettily("Hello World"));
 		});
-		router.route("/repos").handler(routingContext -> {
-			// go to the web and
-		});
+		router.route("/repos").handler(new RepoHandler());
 		router.route().handler(StaticHandler.create());
 		return router;
 	}
