@@ -6,14 +6,24 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 
+@Component
+@Qualifier("repo")
 public class RepoHandler implements Handler<RoutingContext> {
+
+	@Value("${scan.repos}")
+	private List<String> repos;
 
 	@Override
 	public void handle(final RoutingContext routingContext) {
