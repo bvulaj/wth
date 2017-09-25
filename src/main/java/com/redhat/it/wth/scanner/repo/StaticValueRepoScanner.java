@@ -1,6 +1,7 @@
 package com.redhat.it.wth.scanner.repo;
 
 import com.redhat.it.wth.model.Repo;
+import io.vertx.core.Future;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -29,7 +30,9 @@ public class StaticValueRepoScanner implements RepoScanner {
 	}
 
 	@Override
-	public Set<Repo> scanForRepos(final URL sourceUrl) {
-		return new HashSet<>(staticRepolist);
+	public Future<Set<Repo>> scanForRepos(final URL sourceUrl) {
+		final Future scanFuture = Future.future();
+		scanFuture.complete(staticRepolist);
+		return scanFuture;
 	}
 }
