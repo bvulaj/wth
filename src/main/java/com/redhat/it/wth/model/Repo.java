@@ -3,57 +3,29 @@ package com.redhat.it.wth.model;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+@Entity
+@Data
+@RequiredArgsConstructor
 public class Repo {
-
-	private final String name;
-	private final URI location;
-
-	public Repo(final String name, final URI location) {
-		this.name = name;
-		this.location = location;
-	}
+	@Id
+	private Long id;
+	private @NonNull String name;
+	private @NonNull URI location;
 
 	public Repo(final String name, final String location) {
 		this.name = name;
 		try {
 			this.location = new URI(location);
 		} catch (URISyntaxException e) {
-			// TODO real error handling here
-			throw new RuntimeException("bleh");
+			throw new RuntimeException(e);
 		}
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public URI getLocation() {
-		return location;
-	}
-
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		final Repo repo = (Repo) o;
-
-		if (name != null ? !name.equals(repo.name) : repo.name != null) return false;
-		return location != null ? location.equals(repo.location) : repo.location == null;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = name != null ? name.hashCode() : 0;
-		result = 31 * result + (location != null ? location.hashCode() : 0);
-		return result;
-	}
-
-	@Override
-	public String toString() {
-		return "Repo{" +
-				"name='" + name + '\'' +
-				", location=" + location +
-				'}';
-	}
 }

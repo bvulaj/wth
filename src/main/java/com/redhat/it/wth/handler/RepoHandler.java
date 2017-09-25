@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.redhat.it.wth.model.Repo;
+import com.redhat.it.wth.repository.RepoRepository;
 import com.redhat.it.wth.scanner.repo.RepoScanner;
 
 import io.vertx.core.Handler;
@@ -30,6 +31,9 @@ public class RepoHandler implements Handler<RoutingContext>, NeedsVertx<RepoHand
 
 	@Autowired
 	List<RepoScanner> repoScanners;
+	
+	@Autowired
+	RepoRepository repoRepository;
 
 	@Override
 	public void handle(final RoutingContext routingContext) {
@@ -47,7 +51,7 @@ public class RepoHandler implements Handler<RoutingContext>, NeedsVertx<RepoHand
 			final Set<Repo> repoSet = repoScanners.stream()
 					.flatMap(scanner -> scanner.scanForRepos(repoUrl).stream())
 					.collect(Collectors.toSet());
-			response.end(Json.encodePrettily(repoSet));
+			response.end(Json.encodePrettily(repoRepository.save(repoSet)));
 		} catch (MalformedURLException e) {
 			// TODO real error handling
 			routingContext.response().setStatusCode(500);
