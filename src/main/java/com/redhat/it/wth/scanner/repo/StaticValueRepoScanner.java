@@ -1,6 +1,7 @@
 package com.redhat.it.wth.scanner.repo;
 
 import com.redhat.it.wth.model.Repo;
+import io.vertx.core.Future;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -16,12 +17,7 @@ public class StaticValueRepoScanner implements RepoScanner {
 	private Set<Repo> staticRepolist;
 
 	public StaticValueRepoScanner() {
-		try {
-			staticRepolist = Collections.singleton(new Repo("darcy", new URI("ssh://gitolite.corp.redhat.com/it-smw/darcy.git")));
-		} catch (URISyntaxException e) {
-			// TODO throw something
-			staticRepolist = Collections.emptySet();
-		}
+		staticRepolist = Collections.singleton(new Repo("darcyyyy", "ssh://gitolite.corp.redhat.com/it-smw/darcy.git"));
 	}
 
 	public StaticValueRepoScanner(final Set<Repo> staticRepolist) {
@@ -29,7 +25,9 @@ public class StaticValueRepoScanner implements RepoScanner {
 	}
 
 	@Override
-	public Set<Repo> scanForRepos(final URL sourceUrl) {
-		return new HashSet<>(staticRepolist);
+	public Future<Set<Repo>> scanForRepos(final URL sourceUrl) {
+		final Future scanFuture = Future.future();
+		scanFuture.complete(staticRepolist);
+		return scanFuture;
 	}
 }

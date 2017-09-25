@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.vertx.core.Future;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -26,8 +27,9 @@ public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepo
 	private Vertx vertx;
 
 	@Override
-	public Set<Repo> scanForRepos(final URL sourceUrl) {
+	public Future<Set<Repo>> scanForRepos(final URL sourceUrl) {
 		// TODO for now we're just assuming gitolite organization URL's.  Need to validate prior to attempted parsing
+		final Future<Set<Repo>> repoScanFuture = Future.future();
 
 		WebClient client = WebClient.create(vertx, new WebClientOptions().setSsl(true));
 		final Set<Repo> foundRepos = new HashSet<>();
@@ -40,19 +42,23 @@ public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepo
 						System.out.println("found elements: " + repoTableDatas.size());
 						System.out.println(repoTableDatas);
 
+						// TODO convert these relative paths into full paths
 						foundRepos.addAll(repoTableDatas.stream()
-								.map(repoTableData -> new Repo(repoTableData.select("[title]").text(), repoTableData.select("href").text()))
+								.map(repoTableData -> new Repo(repoTableData.select("[title]").text(), repoTableData.select("[href]").text()))
 								.collect(Collectors.toSet()));
 
 						System.out.println(foundRepos);
 
+						repoScanFuture.complete(foundRepos);
+
 					}
 					else {
 						System.out.println("FAILURE! " + result.cause().getMessage());
+						repoScanFuture.fail(result.cause().getMessage());
 					}
 				});
 
-		return foundRepos;
+		return repoScanFuture;
 	}
 
 	@Override

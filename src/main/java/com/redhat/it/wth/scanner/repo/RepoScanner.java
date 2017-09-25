@@ -2,6 +2,7 @@
 package com.redhat.it.wth.scanner.repo;
 
 import com.redhat.it.wth.model.Repo;
+import io.vertx.core.Future;
 
 import java.net.URL;
 import java.util.Set;
@@ -13,6 +14,6 @@ import java.util.Set;
  */
 public interface RepoScanner {
 
-	Set<Repo> scanForRepos(URL sourceUrl);
+	Future<Set<Repo>> scanForRepos(URL sourceUrl);
 
 }
