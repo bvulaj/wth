@@ -1,5 +1,7 @@
 package com.redhat.it.wth;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,9 @@ public class ServerVerticle extends AbstractVerticle {
 	@Value("${http.port:8080}")
 	private int port;
 
+	@Value("${scan.repos}")
+	private List<String> repos;
+
 	@Override
 	public void start() throws Exception {
 		vertx.createHttpServer().requestHandler(router()::accept).listen(port);
@@ -26,6 +31,9 @@ public class ServerVerticle extends AbstractVerticle {
 			HttpServerResponse response = routingContext.response();
 			response.putHeader("Content-Type", "application/json");
 			response.end(Json.encodePrettily("Hello World"));
+		});
+		router.route("/repos").handler(routingContext -> {
+			// go to the web and
 		});
 		router.route().handler(StaticHandler.create());
 		return router;
