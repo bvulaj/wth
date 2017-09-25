@@ -1,5 +1,5 @@
 
-package com.redhat.it.wth.handler;
+package com.redhat.it.wth.scanner.repo;
 
 import com.redhat.it.wth.model.Repo;
 

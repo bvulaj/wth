@@ -1,23 +1,24 @@
 
-package com.redhat.it.wth.handler;
+package com.redhat.it.wth.scanner.repo;
 
-import com.redhat.it.wth.model.Repo;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import com.redhat.it.wth.handler.NeedsVertx;
+import com.redhat.it.wth.model.Repo;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 
 @Component
 public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepoScanner> {
@@ -30,7 +31,7 @@ public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepo
 
 		WebClient client = WebClient.create(vertx, new WebClientOptions().setSsl(true));
 		final Set<Repo> foundRepos = new HashSet<>();
-		client.get(443, "gitolite.corp.redhat.com", "/cgit/it-smw")
+		client.get(443, "gitolite.corp.redhat.com", "/cgit/it-smw") // TODO: There is a `getAbs` as well which I think we'll probably end up using
 				.send(result -> {
 					if (result.succeeded()) {
 						final HttpResponse<Buffer> response = result.result();

@@ -8,8 +8,7 @@ import io.vertx.core.Vertx;
  *
  * Should return an empty set if the URL is not of the type expected
  */
-public interface NeedsVertx<T extends NeedsVertx> {
-
+public interface NeedsVertx<T extends NeedsVertx<?>> {
 
 	T setVertx(Vertx vertx);
 
