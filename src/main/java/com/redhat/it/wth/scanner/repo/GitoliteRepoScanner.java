@@ -39,21 +39,15 @@ public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepo
 						final HttpResponse<Buffer> response = result.result();
 						Document responseDoc = Jsoup.parse(response.bodyAsString());
 						Elements repoTableDatas = responseDoc.select("td.sublevel-repo > a");
-						System.out.println("found elements: " + repoTableDatas.size());
-						System.out.println(repoTableDatas);
 
 						// TODO convert these relative paths into full paths
 						foundRepos.addAll(repoTableDatas.stream()
 								.map(repoTableData -> new Repo(repoTableData.select("[title]").text(), repoTableData.select("[href]").text()))
 								.collect(Collectors.toSet()));
-
-						System.out.println(foundRepos);
-
 						repoScanFuture.complete(foundRepos);
 
 					}
 					else {
-						System.out.println("FAILURE! " + result.cause().getMessage());
 						repoScanFuture.fail(result.cause().getMessage());
 					}
 				});

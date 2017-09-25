@@ -61,7 +61,9 @@ public class RepoHandler implements Handler<RoutingContext>, NeedsVertx<RepoHand
 					final Set<Repo> aggregatedRepoScanResults = repoScanResults.result().list().stream()
 							.flatMap(rawStream -> ((Set<Repo>) rawStream).stream())
 							.collect(Collectors.toSet());
-					response.end(Json.encodePrettily(repoRepository.save(aggregatedRepoScanResults)));
+					// TODO this fails after first time with duplicate errors,.. fix scope
+//					response.end(Json.encodePrettily(repoRepository.save(aggregatedRepoScanResults)));
+					response.end(Json.encodePrettily(aggregatedRepoScanResults));
 				} else {
 					routingContext.response().setStatusCode(500);
 					routingContext.response().setStatusMessage("Internal Server Error");
