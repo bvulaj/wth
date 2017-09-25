@@ -7,11 +7,17 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Component
 public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepoScanner> {
@@ -23,19 +29,29 @@ public class GitoliteRepoScanner implements RepoScanner, NeedsVertx<GitoliteRepo
 		// TODO for now we're just assuming gitolite organization URL's.  Need to validate prior to attempted parsing
 
 		WebClient client = WebClient.create(vertx, new WebClientOptions().setSsl(true));
+		final Set<Repo> foundRepos = new HashSet<>();
 		client.get(443, "gitolite.corp.redhat.com", "/cgit/it-smw")
 				.send(result -> {
 					if (result.succeeded()) {
-						System.out.println("we have had great success!");
 						final HttpResponse<Buffer> response = result.result();
-						System.out.println(response.bodyAsString());
+						Document responseDoc = Jsoup.parse(response.bodyAsString());
+						Elements repoTableDatas = responseDoc.select("td.sublevel-repo > a");
+						System.out.println("found elements: " + repoTableDatas.size());
+						System.out.println(repoTableDatas);
+
+						foundRepos.addAll(repoTableDatas.stream()
+								.map(repoTableData -> new Repo(repoTableData.select("[title]").text(), repoTableData.select("href").text()))
+								.collect(Collectors.toSet()));
+
+						System.out.println(foundRepos);
+
 					}
 					else {
 						System.out.println("FAILURE! " + result.cause().getMessage());
 					}
 				});
 
-		return Collections.emptySet();
+		return foundRepos;
 	}
 
 	@Override

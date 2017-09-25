@@ -1,6 +1,7 @@
 package com.redhat.it.wth.model;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Repo {
 
@@ -10,6 +11,16 @@ public class Repo {
 	public Repo(final String name, final URI location) {
 		this.name = name;
 		this.location = location;
+	}
+
+	public Repo(final String name, final String location) {
+		this.name = name;
+		try {
+			this.location = new URI(location);
+		} catch (URISyntaxException e) {
+			// TODO real error handling here
+			throw new RuntimeException("bleh");
+		}
 	}
 
 	public String getName() {
