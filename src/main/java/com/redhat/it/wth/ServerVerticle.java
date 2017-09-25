@@ -33,6 +33,8 @@ public class ServerVerticle extends AbstractVerticle {
 			response.putHeader("Content-Type", "application/json");
 			response.end(Json.encodePrettily("Hello World"));
 		});
+
+		// TODO autowire this, un-new.  ugh.
 		router.route("/repos").handler(new RepoHandler());
 		router.route().handler(StaticHandler.create());
 		return router;
