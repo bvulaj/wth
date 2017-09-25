@@ -3,24 +3,30 @@ package com.redhat.it.wth.handler;
 
 import com.redhat.it.wth.model.Repo;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
-public class RepoHandler implements Handler<RoutingContext> {
+public class RepoHandler implements Handler<RoutingContext>, NeedsVertx<RepoHandler> {
 
 	@Value("${scan.repos}")
 	private List<String> repos;
+
+	private Vertx vertx;
+
+	@Autowired
+	List<RepoScanner> repoScanners;
 
 	@Override
 	public void handle(final RoutingContext routingContext) {
@@ -28,16 +34,29 @@ public class RepoHandler implements Handler<RoutingContext> {
 		response.putHeader("Content-Type", "application/json");
 
 		try {
-			// TODO dynamically pick scanner based on repo type
-			final RepoScanner dummyScanner = new StaticValueRepoScanner(Collections.singleton(new Repo("acstools", new URI("ssh://gitolite.corp.redhat.com/puppet-cfg/modules/acstools.git"))));
-			// TODO move this to read properties
-			response.end(Json.encodePrettily(dummyScanner.scanForRepos(new URL("http://doesnt.matter.for.static.scanner.com"))));
-		} catch (URISyntaxException|MalformedURLException e) {
+			// pass vertx if we need it
+			repoScanners.stream()
+					.filter(scanner -> scanner instanceof NeedsVertx)
+					.map(scanner -> (NeedsVertx)scanner)
+					.forEach(needsVertxScanner -> needsVertxScanner.setVertx(vertx));
+
+			final URL repoUrl = new URL("https://gitolite.corp.redhat.com/cgit/it-smw");
+			final Set<Repo> repoSet = repoScanners.stream()
+					.flatMap(scanner -> scanner.scanForRepos(repoUrl).stream())
+					.collect(Collectors.toSet());
+			response.end(Json.encodePrettily(repoSet));
+		} catch (MalformedURLException e) {
 			// TODO real error handling
 			routingContext.response().setStatusCode(500);
 			routingContext.response().setStatusMessage("Internal Server Error");
 			response.end();
 		}
 
+	}
+
+	@Override
+	public RepoHandler setVertx(final Vertx vertx) {
+		this.vertx = vertx;
+		return this;
 	}
 }

@@ -31,6 +31,7 @@ public class ServerVerticle extends AbstractVerticle {
 			response.putHeader("Content-Type", "application/json");
 			response.end(Json.encodePrettily("Hello World"));
 		});
+		repoHandler.setVertx(vertx);
 		router.route("/repos").handler(repoHandler);
 		router.route().handler(StaticHandler.create());
 		return router;

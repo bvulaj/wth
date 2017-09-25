@@ -1,18 +1,16 @@
 
 package com.redhat.it.wth.handler;
 
-import com.redhat.it.wth.model.Repo;
-
-import java.net.URL;
-import java.util.Set;
+import io.vertx.core.Vertx;
 
 /**
  * Scans the given URL for repos.
  *
  * Should return an empty set if the URL is not of the type expected
  */
-public interface RepoScanner {
+public interface NeedsVertx<T extends NeedsVertx> {
 
-	Set<Repo> scanForRepos(URL sourceUrl);
+
+	T setVertx(Vertx vertx);
 
 }
